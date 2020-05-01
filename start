@@ -1,0 +1,44 @@
+#!/bin/bash
+
+echo "Starting Brown Noise Generator"
+start=$SECONDS
+
+secondsInMinutes=60
+minutes=2
+runtime=$(($secondsInMinutes*$minutes))
+
+echo "Running for $minutes minutes"
+
+omxplayer brown-noise.mp3 &
+
+actualseconds=0
+quickseconds=0
+log=0
+
+while true; do 
+  if [[ $SECONDS-$start -gt $runtime ]]; then
+    break
+  fi
+  unset quickseconds
+  quickseconds=$(( $SECONDS-$start ))
+
+  if [[ $actualseconds != $quickseconds ]]; then
+    unset actualseconds
+    actualseconds=$quickseconds
+    if [[ $(( $actualseconds % 60 )) == 0 ]]; then
+      unset log
+      log=1
+    fi
+  fi
+
+  if [[ $log == 1 ]]; then
+    echo "Minute $(( $actualseconds/60 )) of running"
+    unset log
+    log=0
+  fi
+
+done
+
+pkill omxplayer
+duration=$(( SECONDS - start ))
+echo "Finished running after $(( $duration/60 )) minutes "
